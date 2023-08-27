@@ -4,15 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	config "github.com/dsbferris/traefik-crowdsec-bouncer/config"
 	"github.com/dsbferris/traefik-crowdsec-bouncer/model"
@@ -85,7 +85,7 @@ func isIpAuthorized(clientIP string) (bool, error) {
 			log.Err(err).Msg("An error occurred while closing body reader")
 		}
 	}(resp.Body)
-	reqBody, err := ioutil.ReadAll(resp.Body)
+	reqBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return false, err
 	}
@@ -106,7 +106,7 @@ func isIpAuthorized(clientIP string) (bool, error) {
 }
 
 /*
-	Main route used by Traefik to verify authorization for a request
+Main route used by Traefik to verify authorization for a request
 */
 func ForwardAuth(c *gin.Context) {
 	ipProcessed.Inc()
@@ -132,7 +132,7 @@ func ForwardAuth(c *gin.Context) {
 }
 
 /*
-	Route to check bouncer connectivity with Crowdsec agent. Mainly use for Kubernetes readiness probe
+Route to check bouncer connectivity with Crowdsec agent. Mainly use for Kubernetes readiness probe
 */
 func Healthz(c *gin.Context) {
 	isHealthy, err := isIpAuthorized(healthCheckIp)
@@ -145,7 +145,7 @@ func Healthz(c *gin.Context) {
 }
 
 /*
-	Simple route responding pong to every request. Mainly use for Kubernetes liveliness probe
+Simple route responding pong to every request. Mainly use for Kubernetes liveliness probe
 */
 func Ping(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
