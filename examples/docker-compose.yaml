@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
   traefik:
-    image: traefik:v2.5
+    image: traefik:v2.10.4
     container_name: "traefik-example"
     command:
 #      - "--log.level=DEBUG"
@@ -29,7 +27,7 @@ services:
       - "traefik.http.routers.whoami.middlewares=crowdsec-bouncer@docker"
 
   crowdsec:
-    image: crowdsecurity/crowdsec:v1.2.0
+    image: crowdsecurity/crowdsec:v1.5.2
     container_name: "crowdsec-example"
     environment:
       COLLECTIONS: "crowdsecurity/nginx"
@@ -41,7 +39,7 @@ services:
       - crowdsec-config-example:/etc/crowdsec/
 
   bouncer:
-    image: fbonalair/traefik-crowdsec-bouncer:0.1.1
+    image: dsbferris/traefik-crowdsec-bouncer:v0.5.1
     container_name: "bouncer-example"
     environment:
       CROWDSEC_BOUNCER_API_KEY: MyApiKey
