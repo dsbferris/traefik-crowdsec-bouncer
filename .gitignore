@@ -23,3 +23,7 @@ tmp/
 
 !.idea/runConfigurations/
 !.idea/rest-api.http
+
+tests/etc-crowdsec
+tests/var-lib-crowdsec-data
+tests/var-log-nginx
