@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"time"
 
-	. "github.com/fbonalair/traefik-crowdsec-bouncer/config"
-	"github.com/fbonalair/traefik-crowdsec-bouncer/model"
+	config "github.com/dsbferris/traefik-crowdsec-bouncer/config"
+	"github.com/dsbferris/traefik-crowdsec-bouncer/model"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -28,11 +28,11 @@ const (
 	healthCheckIp        = "127.0.0.1"
 )
 
-var crowdsecBouncerApiKey = RequiredEnv("CROWDSEC_BOUNCER_API_KEY")
-var crowdsecBouncerHost = RequiredEnv("CROWDSEC_AGENT_HOST")
-var crowdsecBouncerScheme = OptionalEnv("CROWDSEC_BOUNCER_SCHEME", "http")
-var crowdsecBanResponseCode, _ = strconv.Atoi(OptionalEnv("CROWDSEC_BOUNCER_BAN_RESPONSE_CODE", "403")) // Validated via ValidateEnv()
-var crowdsecBanResponseMsg = OptionalEnv("CROWDSEC_BOUNCER_BAN_RESPONSE_MSG", "Forbidden")
+var crowdsecBouncerApiKey = config.RequiredEnv("CROWDSEC_BOUNCER_API_KEY")
+var crowdsecBouncerHost = config.RequiredEnv("CROWDSEC_AGENT_HOST")
+var crowdsecBouncerScheme = config.OptionalEnv("CROWDSEC_BOUNCER_SCHEME", "http")
+var crowdsecBanResponseCode, _ = strconv.Atoi(config.OptionalEnv("CROWDSEC_BOUNCER_BAN_RESPONSE_CODE", "403")) // Validated via ValidateEnv()
+var crowdsecBanResponseMsg = config.OptionalEnv("CROWDSEC_BOUNCER_BAN_RESPONSE_MSG", "Forbidden")
 var (
 	ipProcessed = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "crowdsec_traefik_bouncer_processed_ip_total",
@@ -48,7 +48,7 @@ var client = &http.Client{
 	Timeout: 5 * time.Second,
 }
 
-/**
+/*
 Call Crowdsec local IP and with realIP and return true if IP does NOT have a ban decisions.
 */
 func isIpAuthorized(clientIP string) (bool, error) {
