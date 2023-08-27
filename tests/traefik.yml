@@ -1,0 +1,13 @@
+api:
+  insecure: true
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+  web:
+    address: ":80"
+
+# log:
+#   level: "DEBUG"
