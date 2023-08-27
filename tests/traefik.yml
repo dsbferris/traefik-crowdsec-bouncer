@@ -6,6 +6,7 @@ providers:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
 
+entryPoints:
   web:
     address: ":80"
 
