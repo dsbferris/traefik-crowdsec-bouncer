@@ -1,1 +1,1 @@
-dsbferris/traefik-crodwsec-bouncer
+dsbferris/traefik-crowdsec-bouncer
