@@ -102,7 +102,14 @@ func isIpAuthorized(clientIP string) (bool, error) {
 	}
 
 	// Authorization logic
-	return len(decisions) < 0, nil
+	// I guess, having a decision from crowdsec means,
+	// that IP has a ban.
+	// So we only return true if there are no decisions found.
+	// Originally it was:
+	// 	return len(decisions) < 0, nil
+
+	authorized := len(decisions) == 0
+	return authorized, nil
 }
 
 /*
