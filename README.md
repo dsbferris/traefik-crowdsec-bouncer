@@ -65,6 +65,9 @@ The webservice configuration is made via environment variables:
 * `GIN_MODE`                            - By default, run app in "debug" mode. Set it to "release" in production
 * `TRUSTED_PROXIES`                     - List of trusted proxies IP addresses in CIDR format, delimited by ','. Default of 0.0.0.0/0 should be fine for most use cases, but you HAVE to add them directly in Traefik. 
 
+Each environment variable can also be used with its respective <env-var>_FILE variant.  
+This allows the use of docker secrets.
+
 ## Exposed routes
 The webservice exposes some routes:
 
