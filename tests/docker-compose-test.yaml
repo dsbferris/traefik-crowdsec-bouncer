@@ -4,6 +4,8 @@ services:
     container_name: crowdsec-test
     hostname: crowdsec-test
     image: crowdsecurity/crowdsec:v1.5.2
+    networks:
+      - test-net
     environment:
       COLLECTIONS: "crowdsecurity/nginx"
       GID: "${GID-1000}"
@@ -24,6 +26,8 @@ services:
     container_name: traefik-test
     hostname: traefik-test
     image: traefik:v2.10.4
+    networks:
+      - test-net
     depends_on:
       crowdsec-test:
         condition: service_healthy
@@ -39,6 +43,8 @@ services:
     container_name: bouncer-test
     hostname: bouncer-test
     image: dsbferris/traefik-crowdsec-bouncer:v0.5.1
+    networks:
+      - test-net
     depends_on:
       crowdsec-test:
         condition: service_healthy
@@ -53,13 +59,19 @@ services:
     container_name: whoami-test
     hostname: whoami-test
     image: traefik/whoami:latest
+    networks:
+      - test-net
     labels:
       # Traefik routing to this service
       traefik.enable: true
-      traefik.http.routers.whoami-test.rule: Host(`localhost`)
+      traefik.http.routers.whoami-test.rule: HostRegexp(`*`)
       traefik.http.routers.whoami-test.entrypoints: web
 
       # Create bouncer middleware
       traefik.http.middlewares.crowdsec-bouncer-test.forwardauth.address: http://bouncer-test:59082/api/v1/forwardAuth
       # Add middleware to router
       traefik.http.routers.whoami-test.middlewares: crowdsec-bouncer-test@docker
+
+networks:
+  test-net:
+    driver: bridge
