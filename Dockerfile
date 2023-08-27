@@ -1,42 +1,48 @@
-# 1.17-alpine bug : standard_init_linux.go:228: exec user process caused: no such file or directory
+# CGO_ENABLE=0 enforces the use of go's native implementation.
+# With this we avoid having a dynamically linked executable
+# that would not work in our standalone container down below.
+
 ARG GOLANG_VERSION=1.21
+ 
+# STAGE 1: building the executable
+FROM golang:${GOLANG_VERSION}-alpine AS build
+ 
+#RUN apk add --no-cache git
 
-# Building custom health checker
-FROM golang:$GOLANG_VERSION as health-build-env
-
-# Copying source
 WORKDIR /go/src/app
-COPY ./healthcheck /go/src/app
+COPY ./ ./
 
-# Installing dependencies
-RUN go get -d -v ./...
+# Get all dependencies
+RUN go mod download
+# TODO Maybe save this for later use?
 
-# Compiling
-RUN go build -o /go/bin/healthchecker
+# Build the healthchecker executable
+RUN CGO_ENABLED=0 go build \
+    -installsuffix 'static' \
+    -o /healthchecker ./healthcheck/healthchecker.go 
 
-# Building bouncer
-FROM golang:$GOLANG_VERSION as build-env
-
-# Copying source
-WORKDIR /go/src/app
-COPY . /go/src/app
-
-# Installing dependencies
-RUN go get -d -v ./...
-
-# Compiling
-RUN go build -o /go/bin/app
-
-FROM gcr.io/distroless/base:nonroot
-COPY --from=health-build-env --chown=nonroot:nonroot /go/bin/healthchecker /
-COPY --from=build-env --chown=nonroot:nonroot /go/bin/app /
+# Build the bouncer executable
+RUN CGO_ENABLED=0 go build \
+    -installsuffix 'static' \
+    -o /app .
+ 
+#####################################
+# STAGE 2: build the container to run
+FROM gcr.io/distroless/static AS final
+ 
+LABEL maintainer="dsbferris"
 
 # Run as a non root user.
-USER nonroot
+USER nonroot:nonroot
+ 
+# copy compiled healthchecker
+COPY --from=build --chown=nonroot:nonroot /healthchecker /healthchecker
 
 # Using custom health checker
 HEALTHCHECK --interval=10s --timeout=5s --retries=2\
   CMD ["/healthchecker"]
-
-# Run app
-CMD ["/app"]
+ 
+ # copy compiled app
+COPY --from=build --chown=nonroot:nonroot /app /app
+# run binary; use vector form
+ENTRYPOINT ["/app"]
