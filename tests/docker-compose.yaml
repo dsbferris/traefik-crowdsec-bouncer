@@ -1,0 +1,64 @@
+secrets:
+  bouncer-test-api-key:
+    file: ./.secret.bouncer-test-api-key
+
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.5.2
+    environment:
+      COLLECTIONS: "crowdsecurity/nginx"
+      GID: "${GID-1000}"
+    healthcheck:
+      test: ["CMD", "cscli", "version"]
+      interval: 20s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - ./etc-crowdsec:/etc/crowdsec/
+      - ./var-log-nginx:/var/log/nginx
+      - ./var-lib-crowdsec-data:/var/lib/crowdsec/data/
+
+  traefik:
+    image: traefik:v2.10.4
+    depends_on:
+      crowdsec:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 20s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/traefik.yml
+
+  bouncer:
+    image: dsbferris/traefik-crowdsec-bouncer:v0.5.2
+    depends_on:
+      crowdsec:
+        condition: service_healthy
+    secrets:
+      - bouncer-test-api-key
+    environment:
+      CROWDSEC_BOUNCER_API_KEY_FILE: /run/secrets/bouncer-test-api-key
+      CROWDSEC_AGENT_HOST: "crowdsec:8080"
+
+  whoami:
+    image: traefik/whoami:latest
+    depends_on:
+      crowdsec:
+        condition: service_healthy
+      traefik:
+        condition: service_healthy
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whoami.rule: Host(`192.168.178.2`)
+      traefik.http.routers.whoami.entrypoints: web
+      traefik.http.middlewares.crowdsec-bouncer.forwardauth.address: "http://bouncer:8080/api/v1/forwardAuth"
+      traefik.http.routers.whoami.middlewares: crowdsec-bouncer@docker
+

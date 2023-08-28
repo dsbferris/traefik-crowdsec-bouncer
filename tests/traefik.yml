@@ -5,11 +5,22 @@ providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
-    network: "test-net"
+    # network: "test-net"
 
 entryPoints:
+  ping:
+    address: ":88"
   web:
     address: ":80"
+
+ping:
+  entryPoint: "ping"
+# experimental:
+#   plugins:
+#     real-ip:
+#       moduleName: github.com/Paxxs/traefik-get-real-ip
+#       version: "v1.0.2"
+
 
 # log:
 #   level: "DEBUG"
