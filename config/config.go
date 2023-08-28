@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 /*
@@ -22,17 +23,21 @@ Check for an environment variable value or the equivalent docker secret, exit pr
 */
 func RequiredEnv(varName string) string {
 	envVar := os.Getenv(varName)
-	envVarFileName := os.Getenv(varName + "_FILE")
-	if envVar == "" && envVarFileName == "" {
-		log.Fatalf("The required env var %s is not provided. Exiting", varName)
-	} else if envVar == "" && envVarFileName != "" {
-		envVarFromFile, err := os.ReadFile(envVarFileName)
-		if err != nil {
-			log.Fatalf("Could not read env var from file %s (Error: %v). Exiting", envVarFileName, err)
-		}
-		return string(envVarFromFile)
+	if envVar != "" {
+		return envVar
 	}
-	return envVar
+	envVarFileName := os.Getenv(varName + "_FILE")
+	if envVarFileName != "" {
+		envVarFromFile, err := os.ReadFile(envVarFileName)
+		if err == nil {
+			log.Printf("Got %s from file %s", varName, envVarFileName)
+			return strings.TrimSpace(string(envVarFromFile))
+		}
+		log.Fatalf("Could not read env var from file %s (Error: %v). Exiting", envVarFileName, err)
+	}
+
+	log.Fatalf("The required env var %s is not provided. Exiting", varName)
+	return ""
 }
 
 /*
