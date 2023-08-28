@@ -1,13 +1,23 @@
-![GitHub](https://img.shields.io/github/license/fbonalair/traefik-crowdsec-bouncer)
+<!-- ![GitHub](https://img.shields.io/github/license/fbonalair/traefik-crowdsec-bouncer)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fbonalair/traefik-crowdsec-bouncer)
 [![Go Report Card](https://goreportcard.com/badge/github.com/fbonalair/traefik-crowdsec-bouncer)](https://goreportcard.com/report/github.com/fbonalair/traefik-crowdsec-bouncer)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7177dce30f0abdf8bcbf/maintainability)](https://codeclimate.com/github/fbonalair/traefik-crowdsec-bouncer/maintainability)
 [![ci](https://github.com/fbonalair/traefik-crowdsec-bouncer/actions/workflows/main.yml/badge.svg)](https://github.com/fbonalair/traefik-crowdsec-bouncer/actions/workflows/main.yml)
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/fbonalair/traefik-crowdsec-bouncer)
 ![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/fbonalair/traefik-crowdsec-bouncer)
+ -->
+
+# About this fork
+I wanted to have a version with [PR#29](https://github.com/fbonalair/traefik-crowdsec-bouncer/pull/29) merged.
+Also I updated go and the packages and fixed some warnings and deprecations. While I was at it, I also refactored the Dockerfile and tests compose.
+
+The String inside a _FILE will be whitspace trimmed!
+
+Use at your own risk!
 
 # traefik-crowdsec-bouncer
 A http service to verify request and bounce them according to decisions made by CrowdSec.
+
 
 # Description
 This repository aim to implement a [CrowdSec](https://doc.crowdsec.net/) bouncer for the router [Traefik](https://doc.traefik.io/traefik/) to block malicious IP to access your services.
@@ -86,3 +96,4 @@ Any constructive feedback is welcome, fill free to add an issue or a pull reques
 4. In `_test.env` replace `<your_generated_api_key>` with the previously generated key
 5. Adding a banned IP to your crodwsec instance with : `docker exec traefik-crowdsec-bouncer-crowdsec-1 cscli decisions add -i 1.2.3.4`
 6. Run test with `godotenv -f ./_test.env go test -cover`
+7. You can delete the ban with `cscli decisions delete --ip 1.2.3.4`
