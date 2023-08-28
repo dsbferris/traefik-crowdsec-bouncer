@@ -1,4 +1,4 @@
-package controler
+package controller
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	config "github.com/dsbferris/traefik-crowdsec-bouncer/config"
+	"github.com/dsbferris/traefik-crowdsec-bouncer/config"
 	"github.com/dsbferris/traefik-crowdsec-bouncer/model"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -101,12 +101,6 @@ func isIpAuthorized(clientIP string) (bool, error) {
 		return false, err
 	}
 
-	// Authorization logic
-	// I guess, having a decision from crowdsec means that IP has a ban.
-	// So we only return true if there are no decisions found.
-	// Originally it was:
-	// 	return len(decisions) < 0, nil
-
 	authorized := len(decisions) == 0
 	return authorized, nil
 }
@@ -128,11 +122,13 @@ func ForwardAuth(c *gin.Context) {
 	// Getting and verifying ip using ClientIP function
 	isAuthorized, err := isIpAuthorized(clientIP)
 	if err != nil {
-		log.Warn().Err(err).Msgf("An error occurred while checking IP %q", c.Request.Header.Get(clientIP))
+		log.Warn().Err(err).Msgf("An error occurred while checking IP %q", clientIP)
 		c.String(crowdsecBanResponseCode, crowdsecBanResponseMsg)
 	} else if !isAuthorized {
+		log.Debug().Msgf("Unauthorized IP %q", clientIP)
 		c.String(crowdsecBanResponseCode, crowdsecBanResponseMsg)
 	} else {
+		log.Debug().Msgf("Authorized IP %q", clientIP)
 		c.Status(http.StatusOK)
 	}
 }
