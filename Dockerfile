@@ -2,19 +2,20 @@
 # With this we avoid having a dynamically linked executable
 # that would not work in our standalone container down below.
 
-ARG GOLANG_VERSION=1.21
+#ARG GOLANG_VERSION=1.21
  
 # STAGE 1: building the executable
-FROM golang:${GOLANG_VERSION}-alpine AS build
+#FROM golang:${GOLANG_VERSION}-alpine AS build
  
 #RUN apk add --no-cache git
+
+FROM dsbferris/go-with-packages:latest as build
 
 WORKDIR /go/src/app
 COPY ./ ./
 
 # Get all dependencies
 RUN go mod download
-# TODO Maybe save this for later use?
 
 # Build the healthchecker executable
 RUN CGO_ENABLED=0 go build \
