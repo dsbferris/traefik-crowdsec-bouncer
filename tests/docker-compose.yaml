@@ -4,7 +4,7 @@ secrets:
 
 services:
   crowdsec:
-    image: crowdsecurity/crowdsec:v1.5.2
+    image: crowdsecurity/crowdsec:v1.5.4
     environment:
       COLLECTIONS: "crowdsecurity/nginx"
       GID: "${GID-1000}"
@@ -20,7 +20,7 @@ services:
       - ./var-lib-crowdsec-data:/var/lib/crowdsec/data/
 
   traefik:
-    image: traefik:v2.10.4
+    image: traefik:v2.10.5
     depends_on:
       crowdsec:
         condition: service_healthy
@@ -38,7 +38,7 @@ services:
       - ./traefik.yml:/traefik.yml
 
   bouncer:
-    image: dsbferris/traefik-crowdsec-bouncer:v0.5.2
+    image: dsbferris/traefik-crowdsec-bouncer:v0.5.3
     depends_on:
       crowdsec:
         condition: service_healthy
