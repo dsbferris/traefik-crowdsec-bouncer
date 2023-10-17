@@ -2,9 +2,8 @@
 # Without this, all go packages would be downloaded over and over again,
 # each time you build the bouncer image.
 
-ARG GOLANG_VERSION=1.21
  
-FROM golang:${GOLANG_VERSION}-alpine
+FROM golang:1.21.3-alpine
  
 #RUN apk add --no-cache git
 

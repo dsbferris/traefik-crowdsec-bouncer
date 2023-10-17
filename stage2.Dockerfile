@@ -1,21 +1,15 @@
-# CGO_ENABLE=0 enforces the use of go's native implementation.
-# With this we avoid having a dynamically linked executable
-# that would not work in our standalone container down below.
-
-#ARG GOLANG_VERSION=1.21
- 
-# STAGE 1: building the executable
-#FROM golang:${GOLANG_VERSION}-alpine AS build
- 
-#RUN apk add --no-cache git
-
-FROM dsbferris/go-with-packages:latest as build
+FROM dsbferris/traefik-crowdsec-bouncer-builder:v0.5.3 as build
 
 WORKDIR /go/src/app
 COPY ./ ./
 
+# Sanity check
 # Get all dependencies
 RUN go mod download
+
+# CGO_ENABLE=0 enforces the use of go's native implementation.
+# With this we avoid having a dynamically linked executable
+# that would not work in our standalone container down below.
 
 # Build the healthchecker executable
 RUN CGO_ENABLED=0 go build \
@@ -43,7 +37,7 @@ COPY --from=build --chown=nonroot:nonroot /healthchecker /healthchecker
 HEALTHCHECK --interval=10s --timeout=5s --retries=2\
   CMD ["/healthchecker"]
  
- # copy compiled app
+# copy compiled app
 COPY --from=build --chown=nonroot:nonroot /app /app
 # run binary; use vector form
 ENTRYPOINT ["/app"]
