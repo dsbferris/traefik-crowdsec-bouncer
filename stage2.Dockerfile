@@ -1,4 +1,4 @@
-FROM dsbferris/traefik-crowdsec-bouncer-builder:v0.5.3 as build
+FROM dsbferris/traefik-crowdsec-bouncer:builder as build
 
 WORKDIR /go/src/app
 COPY ./ ./
